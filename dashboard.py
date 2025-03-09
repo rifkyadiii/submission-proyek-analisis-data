@@ -7,7 +7,7 @@ import seaborn as sns
 # Konfigurasi halaman
 st.set_page_config(
     page_title="Dashboard Analisis Peminjaman Sepeda",
-    page_icon="🚲",
+    page_icon="",
     layout="wide"
 )
 
@@ -24,13 +24,23 @@ def load_data():
 day_df, hour_df = load_data()
 
 # Judul dashboard
-st.title("🚲 Dashboard Analisis Peminjaman Sepeda")
+st.title(" Dashboard Analisis Peminjaman Sepeda")
 
 # Sidebar
-st.sidebar.header("Proyek Analisis Data: Bike Sharing Dataset")
+st.sidebar.image("logo.jpg")
 st.sidebar.markdown("**Nama:** Moch Rifky Aulia Adikusumah")
 st.sidebar.markdown("**Email:** rifkyadi67@gmail.com")
 st.sidebar.markdown("**ID Dicoding:** rifkyadi")
+
+# Fitur interaktif: Filter berdasarkan musim
+st.sidebar.header("Filter Data")
+selected_season = st.sidebar.selectbox("Pilih Musim:", ["Semua", "Musim Semi", "Musim Panas", "Musim Gugur", "Musim Dingin"])
+
+# Filter data berdasarkan musim
+if selected_season != "Semua":
+    season_map = {"Musim Semi": 1, "Musim Panas": 2, "Musim Gugur": 3, "Musim Dingin": 4}
+    day_df = day_df[day_df['season'] == season_map[selected_season]]
+    hour_df = hour_df[hour_df['season'] == season_map[selected_season]]
 
 # Tab
 tab1, tab2, tab3, tab4 = st.tabs([
