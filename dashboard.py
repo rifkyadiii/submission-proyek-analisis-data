@@ -7,7 +7,6 @@ import seaborn as sns
 # Konfigurasi halaman
 st.set_page_config(
     page_title="Dashboard Analisis Peminjaman Sepeda",
-    page_icon="",
     layout="wide"
 )
 
@@ -27,7 +26,6 @@ day_df, hour_df = load_data()
 st.title(" Dashboard Analisis Peminjaman Sepeda")
 
 # Sidebar
-st.sidebar.image("logo.jpg")
 st.sidebar.markdown("**Nama:** Moch Rifky Aulia Adikusumah")
 st.sidebar.markdown("**Email:** rifkyadi67@gmail.com")
 st.sidebar.markdown("**ID Dicoding:** rifkyadi")
