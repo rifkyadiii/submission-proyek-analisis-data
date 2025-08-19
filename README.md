@@ -56,7 +56,7 @@ Ikuti langkah-langkah berikut untuk menjalankan dasbor ini di mesin lokal Anda.
 
 1.  **Clone Repositori**
     ```bash
-    git clone [https://github.com/nama-user-anda/nama-repo-anda.git](https://github.com/nama-user-anda/nama-repo-anda.git)
+    git clone [https://github.com/rifkyadiii/submission-proyek-analisis-data](https://github.com/rifkyadiii/submission-proyek-analisis-data.git)
     cd nama-repo-anda
     ```
 
@@ -90,13 +90,14 @@ Ikuti langkah-langkah berikut untuk menjalankan dasbor ini di mesin lokal Anda.
 ---
 
 ## 📁 Struktur Repositori
-
 .
 ├── dashboard/
-│   └── dashboard.py      # Script utama aplikasi Streamlit
+│   └── dashboard.py      # Script utama untuk aplikasi Streamlit
+│
 ├── data/
-│   ├── day.csv           # Dataset harian
-│   └── hour.csv          # Dataset per jam
-├── NOTEBOOK.IPNYB        # Jupyter Notebook berisi proses analisis data lengkap
-├── requirements.txt      # Daftar dependensi Python
-└── README.md             # File ini
+│   ├── day.csv           # Dataset dengan agregasi harian
+│   └── hour.csv          # Dataset dengan agregasi per jam
+│
+├── NOTEBOOK.ipynb        # Notebook Jupyter berisi proses analisis data secara lengkap
+├── requirements.txt      # File daftar dependensi Python yang diperlukan
+└── README.md             # Dokumentasi proyek (file ini)
