@@ -12,8 +12,15 @@ st.set_page_config(
 
 @st.cache_data
 def load_data():
-    day_df = pd.read_csv("day.csv")
-    hour_df = pd.read_csv("hour.csv")
+    try:
+        hour_df = pd.read_csv('../data/hour.csv')
+        day_df = pd.read_csv('../data/day.csv')
+        print("Data berhasil dimuat dari ../data")
+    except FileNotFoundError:
+        print("../data tidak ditemukan, mencoba memuat /data")
+        # Jika file tidak ditemukan, mencoba memuat main_data.csv
+        hour_df = pd.read_csv('data/hour.csv')
+        day_df = pd.read_csv('data/day.csv')
     
     day_df['dteday'] = pd.to_datetime(day_df['dteday'])
     hour_df['dteday'] = pd.to_datetime(hour_df['dteday'])
