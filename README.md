@@ -1,17 +1,102 @@
-# submission
-Tugas Akhir Visualiasasi DBS Coding Camp
+# Proyek Analisis Data: Bike Sharing Dataset 🚲
 
-## Setup Environment - Anaconda
-- conda create --name main-ds python=3.9.12
-- conda activate main-ds
-- pip install -r requirements.txt
+Selamat datang di repositori Proyek Analisis Data Bike Sharing. Proyek ini bertujuan untuk melakukan analisis mendalam terhadap dataset penyewaan sepeda dan menyajikan hasilnya dalam sebuah dasbor web interaktif yang dibangun menggunakan Streamlit.
 
-## Setup Environment - Shell/Terminal
-- mkdir submission
-- cd submission
-- pipenv install
-- pipenv shell
-- pip install -r requirements.txt
+## 📊 Dashboard Demo
 
-## Run steamlit app
-streamlit run dashboard.py
+Berikut adalah tampilan dasbor interaktif yang telah dibuat. Dasbor ini memungkinkan pengguna untuk memfilter data dan melihat visualisasi secara dinamis.
+
+*(**Catatan**: Ganti `link_ke_gambar_anda.png` dengan screenshot dasbor Anda)*
+![Dashboard Demo](link_ke_gambar_anda.png)
+
+---
+
+## 📜 Latar Belakang
+
+Dataset Bike Sharing berisi informasi historis tentang jumlah penyewaan sepeda per jam dan per hari selama dua tahun (2011-2012) di sistem Capital Bikeshare, Washington D.C. Data ini mencakup berbagai atribut seperti musim, cuaca, suhu, hari libur, dan jenis pengguna (kasual vs. terdaftar). Analisis terhadap data ini dapat memberikan wawasan berharga untuk mengoptimalkan operasional dan strategi pemasaran.
+
+---
+
+## 🎯 Pertanyaan Bisnis
+
+Analisis ini dirancang untuk menjawab beberapa pertanyaan bisnis utama:
+
+1.  Bagaimana perbandingan jumlah pengguna **kasual** dan **terdaftar** setiap bulannya?
+2.  Bagaimana fluktuasi jumlah pengguna sepanjang tahun? Apakah ada perbedaan pola antara kedua jenis pengguna?
+3.  Bulan apa yang menunjukkan **pertumbuhan pengguna** paling signifikan dibandingkan dengan bulan sebelumnya?
+4.  Bagaimana pola penggunaan sepeda bervariasi sepanjang hari, terutama antara **jam sibuk** dan jam tidak sibuk?
+
+---
+
+## ⚙️ Fitur Dasbor
+
+Dasbor interaktif ini memiliki beberapa fitur utama untuk eksplorasi data:
+
+-   **Filter Data Dinamis**: Pengguna dapat memfilter data berdasarkan:
+    -   Rentang Tanggal
+    -   Musim (Semi, Panas, Gugur, Dingin)
+    -   Tahun (2011, 2012)
+    -   Kondisi Cuaca (Cerah, Berawan, Hujan Ringan, Hujan Deras)
+-   **Visualisasi Multi-Tab**: Analisis disajikan dalam empat tab terpisah untuk fokus pada setiap pertanyaan bisnis.
+-   **Wawasan Langsung**: Setiap visualisasi dilengkapi dengan rangkuman *insight* untuk mempermudah pemahaman.
+
+---
+
+## 🛠️ Teknologi yang Digunakan
+
+-   **Analisis Data**: Python, Pandas, NumPy
+-   **Visualisasi Data**: Matplotlib, Seaborn
+-   **Dashboard Interaktif**: Streamlit
+
+---
+
+## 🚀 Cara Menjalankan Proyek Secara Lokal
+
+Ikuti langkah-langkah berikut untuk menjalankan dasbor ini di mesin lokal Anda.
+
+1.  **Clone Repositori**
+    ```bash
+    git clone [https://github.com/nama-user-anda/nama-repo-anda.git](https://github.com/nama-user-anda/nama-repo-anda.git)
+    cd nama-repo-anda
+    ```
+
+2.  **Buat Lingkungan Virtual (Opsional tapi Direkomendasikan)**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # Untuk Windows: venv\Scripts\activate
+    ```
+
+3.  **Install Dependensi**
+    Pastikan Anda memiliki file `requirements.txt` dengan konten berikut:
+    ```
+    streamlit
+    pandas
+    numpy
+    matplotlib
+    seaborn
+    ```
+    Kemudian, jalankan perintah instalasi:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Jalankan Aplikasi Streamlit**
+    Pastikan Anda berada di direktori utama proyek, lalu jalankan:
+    ```bash
+    streamlit run dashboard/dashboard.py
+    ```
+    Aplikasi akan terbuka secara otomatis di browser Anda.
+
+---
+
+## 📁 Struktur Repositori
+
+.
+├── dashboard/
+│   └── dashboard.py      # Script utama aplikasi Streamlit
+├── data/
+│   ├── day.csv           # Dataset harian
+│   └── hour.csv          # Dataset per jam
+├── NOTEBOOK.IPNYB        # Jupyter Notebook berisi proses analisis data lengkap
+├── requirements.txt      # Daftar dependensi Python
+└── README.md             # File ini

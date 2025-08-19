@@ -3,310 +3,273 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from datetime import date
 
-# Konfigurasi halaman
+# --- KONFIGURASI DAN GAYA ---
+# Mengatur gaya visual untuk semua plot Seaborn dan Matplotlib
+sns.set_style("whitegrid")
+
+# Palet warna untuk konsistensi visual
+PRIMARY_COLOR = "#1f77b4"
+SECONDARY_COLOR = "#ff7f0e"
+ACCENT_COLOR_DARK = "#d62728"
+ACCENT_COLOR_LIGHT = "#aec7e8"
+
+# Konfigurasi halaman Streamlit
 st.set_page_config(
-    page_title="Dashboard Analisis Peminjaman Sepeda",
+    page_title="Dashboard Peminjaman Sepeda",
+    page_icon="🚲",
     layout="wide"
 )
 
+# --- FUNGSI BANTUAN (HELPER FUNCTIONS) ---
 @st.cache_data
 def load_data():
+    """Memuat data dari file CSV dan melakukan pra-pemrosesan dasar."""
     try:
-        hour_df = pd.read_csv('../data/hour.csv')
-        day_df = pd.read_csv('../data/day.csv')
-        print("Data berhasil dimuat dari ../data")
-    except FileNotFoundError:
-        print("../data tidak ditemukan, mencoba memuat /data")
-        # Jika file tidak ditemukan, mencoba memuat main_data.csv
         hour_df = pd.read_csv('data/hour.csv')
         day_df = pd.read_csv('data/day.csv')
+    except FileNotFoundError:
+        # Fallback jika path 'data/' tidak ditemukan
+        hour_df = pd.read_csv('../data/hour.csv')
+        day_df = pd.read_csv('../data/day.csv')
     
+    # Konversi kolom tanggal ke format datetime
     day_df['dteday'] = pd.to_datetime(day_df['dteday'])
     hour_df['dteday'] = pd.to_datetime(hour_df['dteday'])
     
     return day_df, hour_df
 
-day_df, hour_df = load_data()
+def style_plot(ax, title, xlabel, ylabel, rotation=0):
+    """Menerapkan gaya standar ke plot Matplotlib untuk konsistensi."""
+    ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+    ax.set_xlabel(xlabel, fontsize=12)
+    ax.set_ylabel(ylabel, fontsize=12)
+    ax.tick_params(axis='x', rotation=rotation)
+    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    if ax.get_legend_handles_labels()[0]: # Hanya tampilkan legenda jika ada
+        ax.legend(fontsize=10)
 
-# Judul dashboard
-st.title(" Dashboard Analisis Peminjaman Sepeda")
+# --- MEMUAT DATA UTAMA ---
+main_day_df, main_hour_df = load_data()
 
-# Sidebar
-st.sidebar.markdown("**Nama:** Moch Rifky Aulia Adikusumah")
-st.sidebar.markdown("**Email:** rifkyadi67@gmail.com")
-st.sidebar.markdown("**ID Dicoding:** rifkyadi")
+# --- SIDEBAR DAN FILTER ---
+with st.sidebar:
+    st.markdown("**Nama:** Moch Rifky Aulia Adikusumah")
+    st.markdown("**Email:** rifkyadi67@gmail.com")
+    st.markdown("**ID Dicoding:** rifkyadi")
+    st.markdown("---")
+    
+    st.header("⚙️ Filter Data")
 
-# Fitur interaktif: Filter berdasarkan musim
-st.sidebar.header("Filter Data")
-selected_season = st.sidebar.selectbox("Pilih Musim:", ["Semua", "Musim Semi", "Musim Panas", "Musim Gugur", "Musim Dingin"])
 
-# Filter data berdasarkan musim
+    # Filter 2: Musim
+    selected_season = st.selectbox(
+        "Pilih Musim", 
+        ["Semua", "Musim Semi", "Musim Panas", "Musim Gugur", "Musim Dingin"]
+    )
+
+    # Filter 3: Tahun
+    selected_years = st.multiselect(
+        "Pilih Tahun",
+        options=[2011, 2012],
+        default=[2011, 2012]
+    )
+
+    # Filter 4: Kondisi Cuaca
+    selected_weathers = st.multiselect(
+        "Pilih Kondisi Cuaca",
+        options=["Cerah", "Berawan", "Hujan Ringan", "Hujan Deras"],
+        default=["Cerah", "Berawan", "Hujan Ringan", "Hujan Deras"]
+    )
+
+# --- LOGIKA FILTERING DATA ---
+# Salin dataframe utama agar data asli tidak berubah
+day_df = main_day_df.copy()
+hour_df = main_hour_df.copy()
+
+# Terapkan filter musim
 if selected_season != "Semua":
     season_map = {"Musim Semi": 1, "Musim Panas": 2, "Musim Gugur": 3, "Musim Dingin": 4}
     day_df = day_df[day_df['season'] == season_map[selected_season]]
     hour_df = hour_df[hour_df['season'] == season_map[selected_season]]
 
-# Tab
-tab1, tab2, tab3, tab4 = st.tabs([
-    "Perbandingan Pengguna",
-    "Fluktuasi Tahunan",
-    "Pertumbuhan Bulanan",
-    "Pola Penggunaan Harian"
-])
+# Terapkan filter tahun
+if selected_years:
+    year_map = {2011: 0, 2012: 1}
+    selected_year_values = [year_map[y] for y in selected_years]
+    day_df = day_df[day_df['yr'].isin(selected_year_values)]
+    hour_df = hour_df[hour_df['yr'].isin(selected_year_values)]
 
-# Tab 1: Perbandingan Pengguna Kasual dan Terdaftar
-with tab1:
-    st.header("Perbandingan Jumlah Pengguna Kasual dan Terdaftar per Bulan")
-    
-    monthly_data = day_df.groupby('mnth')[['casual', 'registered']].sum()
-    monthly_data = monthly_data.rename(columns={'casual': 'Kasual', 'registered': 'Terdaftar'})
-    
-    kasual_avg = monthly_data['Kasual'].mean()
-    terdaftar_avg = monthly_data['Terdaftar'].mean()
-    
-    fig, ax = plt.subplots(figsize=(12, 6))
-    
-    colors = ["#1f77b4", "#ff7f0e"]
-    monthly_data.plot(kind='bar', color=colors, ax=ax, edgecolor='black', linewidth=0.7)
-    
-    ax.axhline(kasual_avg, color='#1f77b4', linestyle='--', linewidth=1.5, alpha=0.8)
-    ax.axhline(terdaftar_avg, color='#ff7f0e', linestyle='--', linewidth=1.5, alpha=0.8)
-    
-    ax.set_title('Perbandingan Pengguna Kasual dan Terdaftar per Bulan', fontsize=14, fontweight='bold')
-    ax.set_xlabel('Bulan', fontsize=12)
-    ax.set_ylabel('Jumlah Pengguna', fontsize=12)
-    ax.tick_params(axis='x', rotation=0)
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
-    ax.legend(fontsize=10)
-    
-    st.pyplot(fig)
-    
-    st.info("""
-    **Insight:**
-    -   Pengguna terdaftar secara konsisten mendominasi jumlah pengguna secara keseluruhan.
-    -   Pengguna kasual mengalami fluktuasi musiman yang lebih besar.
-    -   Strategi untuk mempertahankan dan meningkatkan pengguna terdaftar lebih efektif dalam jangka panjang.
-    """)
-    
-    st.subheader("Data Perbandingan Pengguna")
-    st.dataframe(monthly_data)
+# Terapkan filter cuaca
+if selected_weathers:
+    weather_map = {"Cerah": 1, "Berawan": 2, "Hujan Ringan": 3, "Hujan Deras": 4}
+    selected_weather_values = [weather_map[w] for w in selected_weathers]
+    day_df = day_df[day_df['weathersit'].isin(selected_weather_values)]
+    hour_df = hour_df[hour_df['weathersit'].isin(selected_weather_values)]
 
-# Tab 2: Fluktuasi Sepanjang Tahun
-with tab2:
-    st.header("Fluktuasi Jumlah Pengguna Sepanjang Tahun")
-    
-    casual_data = day_df.groupby('mnth')['casual'].sum()
-    registered_data = day_df.groupby('mnth')['registered'].sum()
-    
-    casual_avg = casual_data.mean()
-    registered_avg = registered_data.mean()
-    
-    fig, ax = plt.subplots(figsize=(16, 6))
-    
-    x_labels = np.arange(len(casual_data.index))
-    
-    ax.plot(x_labels, casual_data, marker='o', linestyle='-', linewidth=2, color='tab:blue', label="Kasual")
-    ax.plot(x_labels, registered_data, marker='o', linestyle='-', linewidth=2, color='tab:orange', label="Terdaftar")
-    
-    ax.axhline(casual_avg, color='blue', linestyle='--', linewidth=1.5)
-    ax.axhline(registered_avg, color='orange', linestyle='--', linewidth=1.5)
-    
-    ax.set_xticks(x_labels)
-    ax.set_xticklabels(casual_data.index)
-    ax.set_title("Tren Pengguna Kasual dan Terdaftar Sepanjang Tahun", fontsize=16, fontweight='bold')
-    ax.set_xlabel('Bulan', fontsize=12)
-    ax.set_ylabel('Jumlah Pengguna', fontsize=12)
-    ax.legend(fontsize=10, loc="upper left")
-    
-    st.pyplot(fig)
-    
-    st.info("""
-    **Insight:**
-    -   Kedua jenis pengguna mengalami fluktuasi sepanjang tahun, tetapi dengan pola yang berbeda.
-    -   Pengguna kasual menunjukkan fluktuasi yang lebih besar dan pola musiman yang lebih kuat.
-    -   Pengguna terdaftar menunjukkan stabilitas yang lebih besar dan fluktuasi yang lebih halus.
-    -   Perbedaan ini mungkin disebabkan oleh perbedaan perilaku dan motivasi antara kedua jenis pengguna.
-    """)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("Statistik Pengguna Kasual")
-        st.metric("Rata-rata Bulanan", f"{int(casual_avg):,}")
-        st.metric("Bulan Tertinggi", f"Bulan {casual_data.idxmax()} ({int(casual_data.max()):,})")
-        st.metric("Bulan Terendah", f"Bulan {casual_data.idxmin()} ({int(casual_data.min()):,})")
-    
-    with col2:
-        st.subheader("Statistik Pengguna Terdaftar")
-        st.metric("Rata-rata Bulanan", f"{int(registered_avg):,}")
-        st.metric("Bulan Tertinggi", f"Bulan {registered_data.idxmax()} ({int(registered_data.max()):,})")
-        st.metric("Bulan Terendah", f"Bulan {registered_data.idxmin()} ({int(registered_data.min()):,})")
 
-# Tab 3: Pertumbuhan Bulanan
-with tab3:
-    st.header("Pertumbuhan Pengguna Bulanan Yang Signifikan")
-    
-    casual_growth = day_df.groupby('mnth')['casual'].sum().pct_change() * 100
-    registered_growth = day_df.groupby('mnth')['registered'].sum().pct_change() * 100
-    
-    max_casual_idx = casual_growth.idxmax()
-    max_registered_idx = registered_growth.idxmax()
-    
-    fig, ax = plt.subplots(figsize=(14, 7))
-    x_labels = np.arange(len(casual_growth.index))
-    
-    light_blue = "#a6c8ff"
-    light_orange = "#ffcc99"
-    
-    bars1 = ax.bar(
-        x_labels - 0.2, casual_growth, width=0.4, label='Kasual', color=light_blue
-    )
-    bars2 = ax.bar(
-        x_labels + 0.2, registered_growth, width=0.4, label='Terdaftar', color=light_orange
-    )
-    
-    for i, (bar1, bar2) in enumerate(zip(bars1, bars2)):
-        if casual_growth.index[i] == max_casual_idx:
-            bar1.set_color("tab:blue") 
-            bar1.set_edgecolor('black')
-        if registered_growth.index[i] == max_registered_idx:
-            bar2.set_color("tab:orange") 
-            bar2.set_edgecolor('black')
-    
-    ax.set_xlabel('Bulan', fontsize=12)
-    ax.set_ylabel('Pertumbuhan (%)', fontsize=12)
-    ax.set_title('Pertumbuhan Pengguna Kasual dan Terdaftar per Bulan', fontsize=14, fontweight='bold')
-    
-    ax.set_xticks(x_labels)
-    ax.set_xticklabels(casual_growth.index)
-    ax.axhline(0, color='black', linewidth=1, linestyle='--')
-    ax.legend(fontsize=10)
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
-    
-    st.pyplot(fig)
-    
-    st.info("""
-    **Insight:**
-    -   Bulan ke-3 menunjukkan pertumbuhan paling signifikan untuk kedua jenis pengguna.
-    -   Hal ini mungkin disebabkan oleh faktor musiman, promosi khusus, atau perubahan kondisi cuaca.
-    -   Pertumbuhan negatif di beberapa bulan menunjukkan penurunan dibandingkan bulan sebelumnya.
-    """)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("Pertumbuhan Tertinggi - Pengguna Kasual")
-        st.metric("Bulan", f"Bulan {max_casual_idx}", f"{casual_growth.max():.1f}%")
-    
-    with col2:
-        st.subheader("Pertumbuhan Tertinggi - Pengguna Terdaftar")
-        st.metric("Bulan", f"Bulan {max_registered_idx}", f"{registered_growth.max():.1f}%")
-
-# Tab 4: Pola Penggunaan Harian
-with tab4:
-    st.header("Pola Penggunaan Sepeda Sepanjang Hari")
-    
-    hourly_avg = hour_df.groupby('hr')['cnt'].mean().reset_index()
-    
-    def group_hours(hour):
-        if 7 <= hour <= 9 or 16 <= hour <= 18:
-            return 'Jam Sibuk'
-        else:
-            return 'Jam Tidak Sibuk'
-    
-    hour_df['kelompok_jam'] = hour_df['hr'].apply(group_hours)
-    cluster_characteristics = hour_df.groupby('kelompok_jam').agg({
-        'weathersit': 'mean',
-        'temp': 'mean',
-        'weekday': lambda x: np.bincount(x.astype(int)).argmax(),
-        'cnt': 'mean'
-    }).reset_index()
-
-    # Grafik garis untuk pola per jam
-    fig1, ax1 = plt.subplots(figsize=(12, 6))
-    sns.lineplot(x='hr', y='cnt', data=hourly_avg, marker='o', linewidth=2, ax=ax1)
-        
-    peak_morning = hourly_avg.iloc[hourly_avg.loc[(hourly_avg['hr'] >= 7) & (hourly_avg['hr'] <= 9)]['cnt'].idxmax()]
-    peak_evening = hourly_avg.iloc[hourly_avg.loc[(hourly_avg['hr'] >= 16) & (hourly_avg['hr'] <= 18)]['cnt'].idxmax()]
-        
-    ax1.scatter([peak_morning['hr'], peak_evening['hr']], 
-               [peak_morning['cnt'], peak_evening['cnt']], 
-               color='red', s=100, zorder=5)
-        
-    ax1.set_title('Rata-rata Penggunaan Sepeda per Jam', fontsize=14, fontweight='bold')
-    ax1.set_xlabel('Jam', fontsize=12)
-    ax1.set_ylabel('Rata-rata Penggunaan', fontsize=12)
-    ax1.set_xticks(range(24))
-    ax1.grid(True, linestyle='--', alpha=0.7)
-        
-    ax1.annotate(f'Puncak Pagi: {int(peak_morning["cnt"])}', 
-        xy=(peak_morning['hr'], peak_morning['cnt']),
-        xytext=(peak_morning['hr']-1, peak_morning['cnt']+30),
-        arrowprops=dict(facecolor='black', shrink=0.05, width=1.5))
-        
-    ax1.annotate(f'Puncak Sore: {int(peak_evening["cnt"])}', 
-        xy=(peak_evening['hr'], peak_evening['cnt']),
-        xytext=(peak_evening['hr']+1, peak_evening['cnt']+30),
-        arrowprops=dict(facecolor='black', shrink=0.05, width=1.5))
-        
-    st.pyplot(fig1)
-    
-    cluster_characteristics = cluster_characteristics.sort_values(by="cnt", ascending=False)
-
-    fig2, ax2 = plt.subplots(figsize=(5, 5))
-
-    colors = ["#1f77b4" if cnt == cluster_characteristics["cnt"].max() else "#a6c8ff" 
-            for cnt in cluster_characteristics["cnt"]]
-
-    wedges, texts, autotexts = ax2.pie(
-        cluster_characteristics["cnt"],
-        labels=None,
-        autopct="%1.1f%%",
-        colors=colors,
-        startangle=90,
-        wedgeprops={"linewidth": 1, "edgecolor": "white"}
-    )
-
-    for autotext in autotexts:
-        autotext.set_color('white')
-        autotext.set_fontsize(10)
-        autotext.set_fontweight('bold')
-
-    ax2.set_title("Proporsi Penggunaan Sepeda\nJam Sibuk vs Jam Tidak Sibuk", fontsize=12, fontweight='bold')
-
-    st.pyplot(fig2)
-
-    
-    st.info("""
-    **Insight:**
-    -   Terdapat dua puncak penggunaan sepeda: pagi hari (saat berangkat kerja/sekolah) dan sore hari (saat pulang).
-    -   Jam sibuk mendominasi total penggunaan sepeda meskipun durasinya lebih pendek.
-    -   Penggunaan terendah terjadi pada dini hari.
-    -   Pola ini menunjukkan bahwa banyak pengguna menggunakan sepeda sebagai transportasi untuk aktivitas rutin harian.
-    """)
-    
-st.subheader("Karakteristik Kelompok Jam")
-
-weekday_names = {0: "Senin", 1: "Selasa", 2: "Rabu", 3: "Kamis", 4: "Jumat", 5: "Sabtu", 6: "Minggu"}
-cluster_characteristics['weekday'] = cluster_characteristics['weekday'].map(weekday_names)
-
-weather_map = {
-    1: "Cerah", 
-    2: "Berawan/Berkabut", 
-    3: "Hujan Ringan", 
-    4: "Hujan Deras"
-}
-
-pretty_table = cluster_characteristics.copy()
-pretty_table['weathersit'] = pretty_table['weathersit'].apply(lambda x: f"{x:.2f}")
-pretty_table['temp'] = pretty_table['temp'].apply(lambda x: f"{x*41:.1f}°C")  # Asumsi temp dinormalisasi
-pretty_table['cnt'] = pretty_table['cnt'].apply(lambda x: f"{int(x)}")
-
-pretty_table.columns = ["Kelompok Jam", "Rata-rata Kondisi Cuaca", "Rata-rata Suhu", "Hari Paling Umum", "Rata-rata Jumlah Pengguna"]
-
-st.dataframe(pretty_table, use_container_width=True)
-
-# Footer
+# --- JUDUL UTAMA DASHBOARD ---
+st.title("📊 Dashboard Analisis Peminjaman Sepeda")
+st.markdown("Gunakan filter di sidebar untuk menjelajahi pola peminjaman sepeda berdasarkan berbagai kondisi.")
 st.markdown("---")
-st.caption("Moch Rifky Aulia Adikusumah | Submission Dicoding")
+
+
+# --- TAMPILKAN VISUALISASI JIKA DATA TERSEDIA ---
+if day_df.empty or hour_df.empty:
+    st.warning("Tidak ada data yang tersedia untuk filter yang dipilih. Silakan ubah pilihan filter Anda.")
+else:
+    # --- TABS UNTUK VISUALISASI ---
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "👥 Perbandingan Pengguna",
+        "📈 Fluktuasi Tahunan",
+        "🚀 Pertumbuhan Bulanan",
+        "⏰ Pola Penggunaan Harian"
+    ])
+
+    # Tab 1: Perbandingan Pengguna Kasual dan Terdaftar
+    with tab1:
+        st.header("Perbandingan Jumlah Pengguna Kasual dan Terdaftar per Bulan")
+        
+        monthly_users = day_df.groupby('mnth')[['casual', 'registered']].sum().rename(
+            columns={'casual': 'Kasual', 'registered': 'Terdaftar'}
+        )
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        monthly_users.plot(kind='bar', color=[PRIMARY_COLOR, SECONDARY_COLOR], ax=ax, edgecolor='black', linewidth=0.7)
+        
+        # Menambahkan garis rata-rata
+        ax.axhline(monthly_users['Kasual'].mean(), color=PRIMARY_COLOR, linestyle='--', label='Rata-rata Kasual')
+        ax.axhline(monthly_users['Terdaftar'].mean(), color=SECONDARY_COLOR, linestyle='--', label='Rata-rata Terdaftar')
+        
+        style_plot(ax, 'Jumlah Pengguna per Bulan', 'Bulan', 'Jumlah Pengguna')
+        st.pyplot(fig)
+        
+        st.info("""
+        **Insight:**
+        - Pengguna **terdaftar** secara konsisten mendominasi total peminjaman, menunjukkan adanya basis pelanggan yang loyal.
+        - Peminjaman oleh pengguna **kasual** menunjukkan puncak yang lebih tinggi selama bulan-bulan hangat, menandakan ketergantungan pada cuaca dan musim liburan.
+        """)
+        
+        with st.expander("Lihat Data Detail"):
+            st.dataframe(monthly_users)
+
+    # Tab 2: Fluktuasi Sepanjang Tahun
+    with tab2:
+        st.header("Fluktuasi Jumlah Pengguna Sepanjang Tahun")
+        
+        monthly_trends = day_df.groupby('mnth')[['casual', 'registered']].sum()
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        
+        ax.plot(monthly_trends.index, monthly_trends['casual'], marker='o', linestyle='-', color=PRIMARY_COLOR, label="Kasual")
+        ax.plot(monthly_trends.index, monthly_trends['registered'], marker='o', linestyle='-', color=SECONDARY_COLOR, label="Terdaftar")
+        
+        style_plot(ax, 'Tren Pengguna Kasual vs Terdaftar Sepanjang Tahun', 'Bulan', 'Jumlah Pengguna')
+        ax.set_xticks(monthly_trends.index)
+        st.pyplot(fig)
+        
+        st.info("""
+        **Insight:**
+        - Kedua tipe pengguna menunjukkan tren serupa dengan puncak di pertengahan tahun dan titik terendah di awal tahun.
+        - Fluktuasi pengguna kasual jauh lebih tajam, menegaskan sifat sensitif mereka terhadap musim dan cuaca.
+        """)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Statistik Pengguna Kasual")
+            st.metric("Rata-rata Bulanan", f"{int(monthly_trends['casual'].mean()):,}")
+            st.metric("Puncak Tertinggi", f"Bulan {monthly_trends['casual'].idxmax()} ({int(monthly_trends['casual'].max()):,})")
+        with col2:
+            st.subheader("Statistik Pengguna Terdaftar")
+            st.metric("Rata-rata Bulanan", f"{int(monthly_trends['registered'].mean()):,}")
+            st.metric("Puncak Tertinggi", f"Bulan {monthly_trends['registered'].idxmax()} ({int(monthly_trends['registered'].max()):,})")
+
+    # Tab 3: Pertumbuhan Bulanan
+    with tab3:
+        st.header("Analisis Pertumbuhan Pengguna Bulanan")
+        
+        monthly_growth = day_df.groupby('mnth')[['casual', 'registered']].sum().pct_change().fillna(0) * 100
+        
+        if not monthly_growth.empty and len(monthly_growth) > 1:
+            fig, ax = plt.subplots(figsize=(12, 6))
+            x_labels = np.arange(len(monthly_growth.index))
+            
+            bars1 = ax.bar(x_labels - 0.2, monthly_growth['casual'], width=0.4, label='Kasual', color=ACCENT_COLOR_LIGHT)
+            bars2 = ax.bar(x_labels + 0.2, monthly_growth['registered'], width=0.4, label='Terdaftar', color=SECONDARY_COLOR)
+            
+            max_casual_pos = np.argmax(monthly_growth['casual'].values)
+            max_registered_pos = np.argmax(monthly_growth['registered'].values)
+            max_casual_month = monthly_growth.index[max_casual_pos]
+            max_registered_month = monthly_growth.index[max_registered_pos]
+
+            bars1[max_casual_pos].set_color(PRIMARY_COLOR)
+            bars2[max_registered_pos].set_color(ACCENT_COLOR_DARK)
+            
+            ax.axhline(0, color='black', linewidth=0.8, linestyle='--')
+            style_plot(ax, 'Pertumbuhan Pengguna per Bulan (%)', 'Bulan', 'Pertumbuhan (%)')
+            ax.set_xticks(x_labels)
+            ax.set_xticklabels(monthly_growth.index)
+            st.pyplot(fig)
+            
+            st.info("""
+            **Insight:**
+            - Pertumbuhan paling signifikan umumnya terjadi saat transisi musim, seperti dari musim dingin ke musim semi.
+            - Pertumbuhan negatif menunjukkan penurunan jumlah pengguna dibandingkan bulan sebelumnya.
+            """)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.subheader("Pertumbuhan Tertinggi (Kasual)")
+                st.metric("Bulan", f"{max_casual_month}", f"{monthly_growth.loc[max_casual_month, 'casual']:.1f}%")
+            with col2:
+                st.subheader("Pertumbuhan Tertinggi (Terdaftar)")
+                st.metric("Bulan", f"{max_registered_month}", f"{monthly_growth.loc[max_registered_month, 'registered']:.1f}%")
+        else:
+            st.info("Data tidak cukup untuk menampilkan grafik pertumbuhan bulanan.")
+
+    # Tab 4: Pola Penggunaan Harian
+    with tab4:
+        st.header("Pola Penggunaan Sepeda Sepanjang Hari")
+        
+        hourly_avg = hour_df.groupby('hr')['cnt'].mean()
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        hourly_avg.plot(kind='line', ax=ax, marker='o', color=PRIMARY_COLOR)
+        
+        peak_morning_hour = 8
+        peak_evening_hour = 17
+        peak_morning = hourly_avg.get(peak_morning_hour, 0)
+        peak_evening = hourly_avg.get(peak_evening_hour, 0)
+
+        ax.scatter([peak_morning_hour, peak_evening_hour], [peak_morning, peak_evening], color=ACCENT_COLOR_DARK, s=100, zorder=5, label='Jam Puncak')
+        
+        style_plot(ax, 'Rata-rata Penggunaan Sepeda per Jam', 'Jam dalam Sehari', 'Jumlah Peminjaman Rata-rata')
+        ax.set_xticks(range(24))
+        st.pyplot(fig)
+
+        st.info("""
+        **Insight:**
+        - Terdapat dua puncak penggunaan yang jelas: **pagi (sekitar 08:00)** dan **sore (sekitar 17:00)**, yang berkorelasi dengan jam komuter.
+        - Pola ini menunjukkan bahwa sepeda banyak digunakan sebagai moda transportasi untuk aktivitas rutin harian.
+        """)
+
+        st.subheader("Perbandingan Jam Sibuk vs Jam Tidak Sibuk")
+        
+        def group_hours(hour):
+            return 'Jam Sibuk' if 7 <= hour <= 9 or 16 <= hour <= 18 else 'Jam Tidak Sibuk'
+        
+        hour_df['kelompok_jam'] = hour_df['hr'].apply(group_hours)
+        cluster_counts = hour_df.groupby('kelompok_jam')['cnt'].sum().reset_index()
+        
+        fig, ax = plt.subplots(figsize=(8, 4))
+        sns.barplot(x='cnt', y='kelompok_jam', data=cluster_counts.sort_values('cnt', ascending=False), palette=[PRIMARY_COLOR, ACCENT_COLOR_LIGHT], ax=ax)
+        
+        ax.set_title('Total Peminjaman: Jam Sibuk vs Tidak Sibuk', fontsize=14, fontweight='bold')
+        ax.set_xlabel('Total Peminjaman')
+        ax.set_ylabel('Kelompok Jam')
+        st.pyplot(fig)
+
+# --- FOOTER ---
+st.markdown("---")
+st.caption("© 2024 Dibuat oleh Moch Rifky Aulia Adikusumah | Proyek Akhir Analisis Data")
