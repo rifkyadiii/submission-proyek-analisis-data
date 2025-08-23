@@ -100,7 +100,7 @@ Ikuti langkah-langkah berikut untuk menjalankan dasbor ini di mesin lokal Anda.
 │   ├── day.csv           # Dataset dengan agregasi harian
 │   └── hour.csv          # Dataset dengan agregasi per jam
 │
-├── NOTEBOOK.ipynb        # Notebook Jupyter berisi proses analisis data secara lengkap
+├── notebook.ipynb        # Notebook Jupyter berisi proses analisis data secara lengkap
 ├── requirements.txt      # File daftar dependensi Python yang diperlukan
 └── README.md             # Dokumentasi proyek (file ini)
 ```
