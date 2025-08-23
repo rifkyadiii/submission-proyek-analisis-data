@@ -56,7 +56,7 @@ Ikuti langkah-langkah berikut untuk menjalankan dasbor ini di mesin lokal Anda.
     git clone [https://github.com/rifkyadiii/submission-proyek-analisis-data](https://github.com/rifkyadiii/submission-proyek-analisis-data.git)
     ```
     ```bash
-    cd nama-repo-anda
+    cd submission-proyek-analisis-data
     ```
 
 2.  **Buat Lingkungan Virtual (Opsional tapi Direkomendasikan)**
