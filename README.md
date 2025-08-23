@@ -53,7 +53,7 @@ Ikuti langkah-langkah berikut untuk menjalankan dasbor ini di mesin lokal Anda.
 
 1.  **Clone Repositori**
     ```bash
-    git clone [https://github.com/rifkyadiii/submission-proyek-analisis-data](https://github.com/rifkyadiii/submission-proyek-analisis-data.git)
+    git clone https://github.com/rifkyadiii/submission-proyek-analisis-data
     ```
     ```bash
     cd submission-proyek-analisis-data
