@@ -26,13 +26,8 @@ st.set_page_config(
 @st.cache_data
 def load_data():
     """Memuat data dari file CSV dan melakukan pra-pemrosesan dasar."""
-    try:
-        hour_df = pd.read_csv('data/hour.csv')
-        day_df = pd.read_csv('data/day.csv')
-    except FileNotFoundError:
-        # Fallback jika path 'data/' tidak ditemukan
-        hour_df = pd.read_csv('../data/hour.csv')
-        day_df = pd.read_csv('../data/day.csv')
+    hour_df = pd.read_csv('hour.csv')
+    day_df = pd.read_csv('day.csv')
     
     # Konversi kolom tanggal ke format datetime
     day_df['dteday'] = pd.to_datetime(day_df['dteday'])
