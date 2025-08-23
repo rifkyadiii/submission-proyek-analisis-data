@@ -1,12 +1,9 @@
-<img width="1919" height="1080" alt="image" src="https://github.com/user-attachments/assets/3d22e46a-986c-4ab7-b1e5-94833a6f79c6" /># Proyek Analisis Data: Bike Sharing Dataset 🚲
-
 Selamat datang di repositori Proyek Analisis Data Bike Sharing. Proyek ini bertujuan untuk melakukan analisis mendalam terhadap dataset penyewaan sepeda dan menyajikan hasilnya dalam sebuah dasbor web interaktif yang dibangun menggunakan Streamlit.
 
 ## 📊 Dashboard Demo
 Visualisai dapat dilihat secara langsung di: [Streamlit App](https://dbs-coding-camp-data-analysis.streamlit.app/)
 
-![Dashboard Demo](<img width="1919" height="1080" alt="image" src="https://github.com/user-attachments/assets/fa057053-7525-405c-855d-9322cde7c03c" />
-)
+<img width="1919" height="1080" alt="image" src="https://github.com/user-attachments/assets/3d22e46a-986c-4ab7-b1e5-94833a6f79c6" /># Proyek Analisis Data: Bike Sharing Dataset 🚲
 
 ---
 
