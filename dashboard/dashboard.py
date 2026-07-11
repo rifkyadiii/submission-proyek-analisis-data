@@ -1,3 +1,7 @@
+import os
+os.environ["NPY_DISABLE_CPU_FEATURES"] = "AVX512F,AVX512CD,AVX512_KNL,AVX512_KNM,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX2,FMA3"
+
+
 import streamlit as st
 import pandas as pd
 import numpy as np
