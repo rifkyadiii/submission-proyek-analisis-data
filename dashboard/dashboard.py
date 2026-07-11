@@ -263,8 +263,7 @@ else:
         cluster_counts = hour_df.groupby('kelompok_jam')['cnt'].sum().reset_index()
         
         fig, ax = plt.subplots(figsize=(8, 4))
-        sns.barplot(x='cnt', y='kelompok_jam', data=cluster_counts.sort_values('cnt', ascending=False), palette=[PRIMARY_COLOR, ACCENT_COLOR_LIGHT], ax=ax)
-        
+        sns.barplot(x='cnt', y='kelompok_jam', hue='kelompok_jam', legend=False, data=cluster_counts.sort_values('cnt', ascending=False), palette=[PRIMARY_COLOR, ACCENT_COLOR_LIGHT], ax=ax)
         ax.set_title('Total Peminjaman: Jam Sibuk vs Tidak Sibuk', fontsize=14, fontweight='bold')
         ax.set_xlabel('Total Peminjaman')
         ax.set_ylabel('Kelompok Jam')
