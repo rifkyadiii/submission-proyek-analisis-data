@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use("Agg") 
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import date
@@ -144,6 +146,7 @@ else:
         
         style_plot(ax, 'Jumlah Pengguna per Bulan', 'Bulan', 'Jumlah Pengguna')
         st.pyplot(fig)
+        plt.close(fig)
         
         st.info("""
         **Insight:**
@@ -168,6 +171,7 @@ else:
         style_plot(ax, 'Tren Pengguna Kasual vs Terdaftar Sepanjang Tahun', 'Bulan', 'Jumlah Pengguna')
         ax.set_xticks(monthly_trends.index)
         st.pyplot(fig)
+        plt.close(fig)
         
         st.info("""
         **Insight:**
@@ -211,6 +215,7 @@ else:
             ax.set_xticks(x_labels)
             ax.set_xticklabels(monthly_growth.index)
             st.pyplot(fig)
+            plt.close(fig)
             
             st.info("""
             **Insight:**
@@ -247,6 +252,7 @@ else:
         style_plot(ax, 'Rata-rata Penggunaan Sepeda per Jam', 'Jam dalam Sehari', 'Jumlah Peminjaman Rata-rata')
         ax.set_xticks(range(24))
         st.pyplot(fig)
+        plt.close(fig)
 
         st.info("""
         **Insight:**
@@ -268,6 +274,7 @@ else:
         ax.set_xlabel('Total Peminjaman')
         ax.set_ylabel('Kelompok Jam')
         st.pyplot(fig)
+        plt.close(fig)
 
 # --- FOOTER ---
 st.markdown("---")
