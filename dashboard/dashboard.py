@@ -272,4 +272,4 @@ else:
 
 # --- FOOTER ---
 st.markdown("---")
-st.caption("© 2024 Dibuat oleh Moch Rifky Aulia Adikusumah | Proyek Akhir Analisis Data")
+st.caption("Proyek Analisis Data dan Dashboard Bike Sharing")
