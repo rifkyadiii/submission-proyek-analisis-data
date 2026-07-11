@@ -104,8 +104,15 @@ if selected_season != "Semua":
 if selected_years:
     year_map = {2011: 0, 2012: 1}
     selected_year_values = [year_map[y] for y in selected_years]
-    day_df = day_df[day_df['yr'].isin(selected_year_values)]
-    hour_df = hour_df[hour_df['yr'].isin(selected_year_values)]
+    
+    if len(selected_year_values) == 1:
+        # Gunakan perbandingan langsung untuk 1 nilai, bukan isin()
+        val = selected_year_values[0]
+        day_df = day_df.loc[day_df['yr'].to_numpy() == val].copy()
+        hour_df = hour_df.loc[hour_df['yr'].to_numpy() == val].copy()
+    else:
+        day_df = day_df[day_df['yr'].isin(selected_year_values)]
+        hour_df = hour_df[hour_df['yr'].isin(selected_year_values)]
 
 # Terapkan filter cuaca
 if selected_weathers:
